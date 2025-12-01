@@ -29,12 +29,6 @@ Atlas Agent Tasks is a headless PHP package that defines and manages a structure
 * Maintain stage integrity and transitions through a rules-based engine.
 * Provide an extendable foundation for Codex-oriented workflows.
 
-## Non-Goals
-
-* No UI rendering or frontend components.
-* No authorization or team management.
-* No scheduling or auto-run logic.
-
 ## Terminology
 
 ### Task
