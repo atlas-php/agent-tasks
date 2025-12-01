@@ -7,15 +7,15 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * CreateAgentTaskAttemptsTable stores per-stage agent activity logs.
+ * CreateAgentTaskSessionsTable stores per-stage agent activity logs.
  *
- * Attempts capture inputs, outputs, and outcomes for auditing.
+ * Sessions capture inputs, outputs, and outcomes for auditing.
  */
 return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create(config('atlas-agent-tasks.database.tables.attempts', 'agent_task_attempts'), static function (Blueprint $table): void {
+        Schema::create(config('atlas-agent-tasks.database.tables.sessions', 'atlas_agent_task_sessions'), static function (Blueprint $table): void {
             $table->id();
             $table->unsignedBigInteger('task_id')->index();
             $table->string('stage')->index();
@@ -30,6 +30,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists(config('atlas-agent-tasks.database.tables.attempts', 'agent_task_attempts'));
+        Schema::dropIfExists(config('atlas-agent-tasks.database.tables.sessions', 'atlas_agent_task_sessions'));
     }
 };

@@ -7,7 +7,7 @@ return [
         'connection' => env('ATLAS_AGENT_TASKS_DATABASE_CONNECTION'),
         'tables' => [
             'tasks' => 'atlas_agent_tasks',
-            'attempts' => 'atlas_agent_task_attempts',
+            'sessions' => 'atlas_agent_task_sessions',
         ],
     ],
 ];

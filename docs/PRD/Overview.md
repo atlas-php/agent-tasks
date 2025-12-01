@@ -161,12 +161,12 @@ The package should dispatch events for:
 * Reviewing final outputs
 * Approving or declining
 
-## Attempts
+## Sessions
 
-Attempts represent logged tries for any work performed by agents. Each attempt records the input, output, and outcome. Humans may trigger a retry if the result is unsatisfactory.
+Sessions represent the continuous agent effort for a task. Each session records the input, output, and outcome. Humans may trigger a retry if the result is unsatisfactory, reusing the same session unless a reset is requested.
 
-### Attempt Rules
+### Session Rules
 
-* A retry during **Implement** restarts the implementation stage with a fresh attempt.
-* A retry with additional human feedback sends the task back to the **Plan** stage and starts a new planning session.
-* All attempts are logged and attached to the task for auditing.
+* A retry during **Implement** restarts the implementation stage within the same session unless a reset is requested.
+* A retry with additional human feedback sends the task back to the **Plan** stage and continues the session unless a new session is created for auditing.
+* All sessions are logged and attached to the task for auditing.

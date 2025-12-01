@@ -14,8 +14,8 @@ class AgentTasksServiceProviderTest extends TestCase
 {
     public function test_config_defaults_are_registered(): void
     {
-        $this->assertSame('agent_tasks', config('atlas-agent-tasks.database.tables.tasks'));
-        $this->assertSame('agent_task_attempts', config('atlas-agent-tasks.database.tables.attempts'));
+        $this->assertSame('atlas_agent_tasks', config('atlas-agent-tasks.database.tables.tasks'));
+        $this->assertSame('atlas_agent_task_sessions', config('atlas-agent-tasks.database.tables.sessions'));
         $this->assertNull(config('atlas-agent-tasks.defaults'));
     }
 

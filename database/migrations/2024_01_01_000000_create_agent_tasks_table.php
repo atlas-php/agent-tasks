@@ -15,7 +15,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create(config('atlas-agent-tasks.database.tables.tasks', 'agent_tasks'), static function (Blueprint $table): void {
+        Schema::create(config('atlas-agent-tasks.database.tables.tasks', 'atlas_agent_tasks'), static function (Blueprint $table): void {
             $table->id();
             $table->string('title');
             $table->text('description')->nullable();
@@ -31,6 +31,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists(config('atlas-agent-tasks.database.tables.tasks', 'agent_tasks'));
+        Schema::dropIfExists(config('atlas-agent-tasks.database.tables.tasks', 'atlas_agent_tasks'));
     }
 };
