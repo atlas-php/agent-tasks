@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "84eba8165aaf40ea7c477466b3eb6bb7",
+    "content-hash": "36434001247fab16ed34857a842fa20e",
     "packages": [
         {
             "name": "atlas-php/core",
