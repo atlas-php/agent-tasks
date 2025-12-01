@@ -5,168 +5,112 @@ A headless Laravel package that manages task lifecycles for AI-driven planning, 
 ## Table of Contents
 
 * [Overview](#overview)
-* [Goals](#goals)
-* [Non-Goals](#non-goals)
+* [Projects](#projects)
 * [Terminology](#terminology)
 * [Core Concepts](#core-concepts)
-* [Stages](#stages)
-* [Statuses](#statuses)
+* [Stages and Statuses](#stages-and-statuses)
 * [Workflow Rules](#workflow-rules)
 * [Data Model](#data-model)
 * [Events](#events)
 * [Agent Responsibilities](#agent-responsibilities)
 * [Human Responsibilities](#human-responsibilities)
+* [Sessions](#sessions)
 
 ## Overview
 
-Atlas Agent Tasks is a headless PHP package that defines and manages a structured task pipeline for AI coding agents. It provides a consistent lifecycle for task planning, implementation, QA, and final review. The system is fully UI-agnostic, allowing any frontend or platform to integrate with it.
-
-## Goals
-
-* Provide a strict task lifecycle to ensure high-quality agent-driven development.
-* Enable AI agents to plan, implement, and validate work.
-* Allow humans to create tasks and approve final outputs.
-* Maintain stage integrity and transitions through a rules-based engine.
-* Provide an extendable foundation for Codex-oriented workflows.
-
-## Terminology
-
-### Task
-
-A single unit of work that moves through the workflow.
-
-### Stage
-
-The high-level position of a task within the lifecycle (e.g., Todo → Plan → Implement).
-
-### Status
-
-The real-time activity state of the task (e.g., Pending, Processing).
+Atlas Agent Tasks provides a structured, UI-agnostic lifecycle for AI coding agents and human stakeholders. It standardizes task planning, implementation, QA, and review through consistent rules and stage transitions.
 
 ## Core Concepts
 
 * Humans create tasks.
-* Agents enrich requirements, break down tasks, write code, and validate outputs.
-* Humans perform final review and decide Done/Declined.
-* Each stage has strict rules for entry and exit.
+* Agents enrich, plan, implement, and validate work.
+* Humans confirm final acceptance.
+* Stages and statuses follow strict transition rules.
+* Sessions track all agent activity and retries.
 
-## Stages
+## Stages and Statuses
 
-### Todo (`todo`)
+### Stages
 
-Created by a human with initial requirements. First step in the workflow.
+A stage represents the task’s position within the lifecycle. It defines what phase of work the task is in (planning, implementation, review, etc.) and controls the allowed transitions between phases. **Stages describe progression**.
 
-### Plan (`plan`)
+* **Todo**: Human-created starting point with initial requirements.
+* **Plan**: Agents analyze requirements, add missing details, or generate child tasks; may advance to Final Review.
+* **Blocked**: Agents cannot proceed; human intervention is required.
+* **Ready**: Requirements verified; ready for implementation.
+* **Implement**: Agents execute coding or content generation.
+* **QA Review**: Agents validate whether implementation meets requirements.
+* **Final Review**: Human evaluates deliverables and accepts or declines.
+* **Done**: Work fully completed.
+* **Declined**: Task rejected or unnecessary.
 
-Agents analyze requirements, create missing details, and optionally generate child tasks. May skip ahead to Final Review.
+### Statuses
 
-### Blocked (`blocked`)
+A status represents the task’s activity state inside its current stage. It indicates whether the task is idle, being worked on, or finished for that stage. **Statuses describe real-time state rather than workflow progress**.
 
-Agents cannot proceed due to missing details or required decisions. Humans must resolve or decline.
-
-### Ready (`ready`)
-
-Agents verify requirements and confirm the task is ready for implementation.
-
-### Implement (`implement`)
-
-Agents write code, generate documentation, or execute other implementation tasks.
-
-### QA Review (`qa_review`)
-
-Agents validate implementation and confirm requirements satisfaction. May loop back to Implement.
-
-### Final Review (`final_review`)
-
-Human validates completeness and determines the final acceptance state.
-
-### Done (`done`)
-
-Task is fully completed and accepted.
-
-### Declined (`declined`)
-
-Task is rejected or requires no work.
-
-## Statuses
-
-### Pending (`pending`)
-
-Task is waiting to be picked up.
-
-### Processing (`processing`)
-
-Task is being actively worked on by an agent.
-
-### Completed (`completed`)
-
-Agent has completed its effort for the current stage.
+* **Pending**: Waiting to be picked up.
+* **Processing**: Being actively worked on.
+* **Completed**: Work for the current stage is finished.
 
 ## Workflow Rules
 
-* **Todo → Plan** when an agent begins planning.
-* **Plan → Ready** when requirements are complete.
-* **Plan → Final Review** if no work is required.
-* **Plan → Blocked** if agents cannot proceed.
-* **Blocked → Plan** after human provides missing details.
-* **Ready → Implement** when picked up for execution.
-* **Implement → QA Review** when code generation is finished.
-* **QA Review → Implement** if corrections are needed.
-* **QA Review → Final Review** if work is validated.
-* **Final Review → Done** when human accepts.
-* **Final Review → Implement** if more changes needed.
-* **Final Review → Declined** if rejected.
+* Todo → Plan
+* Plan → Ready
+* Plan → Final Review
+* Plan → Blocked
+* Blocked → Plan
+* Ready → Implement
+* Implement → QA Review
+* QA Review → Implement
+* QA Review → Final Review
+* Final Review → Done
+* Final Review → Implement
+* Final Review → Declined
 
 ## Data Model
 
-### Task Table
+### Projects
+
+Projects act as containers for tasks. Each project maintains its own configuration and workflow context.
 
 * `id`
+* `name`
+* `workspace_location` (string)
+* `task_template` (text)
+* `instructions` (text)
+* `metadata` (json)
+* Timestamps (soft-deletes)
+
+### Tasks
+
+A unit of work that flows through the lifecycle.
+
+* `id`
+* `project_id` (unsignedBigInteger)
 * `title`
-* `description`
+* `description` (text)
 * `stage` (enum)
 * `status` (enum)
-* `parent_id` (nullable)
-* `created_by_user_id` (nullable)
-* `assigned_agent` (nullable)
+* `parent_task_id` (nullable, unsignedBigInteger)
+* `assigned_agent` (nullable, string)
 * `metadata` (json)
-* Timestamps
+* Timestamps (soft-deletes)
 
-### Child Tasks
+### Sessions
 
-Tasks may link to a parent to support multi-step plans.
+Sessions track agent thread (chain-of-thought) execution for a task.
 
-## Events
+* `id`
+* `task_id` (unsignedBigInteger)
+* `type` (planning, implementation, qa)
+* `input` (json)
+* `output` (json)
+* `outcome` (enum)
+* `metadata` (json)
+* Timestamps (soft-deletes)
 
-The package should dispatch events for:
+#### Session Rules
 
-* Stage changed
-* Status changed
-* Task created
-* Task completed
-* Task declined
-
-## Agent Responsibilities
-
-* Planning tasks
-* Generating code
-* Running QA validation
-* Enforcing checklist requirements
-* Handling stage transitions within allowed rules
-
-## Human Responsibilities
-
-* Creating tasks
-* Providing missing details
-* Reviewing final outputs
-* Approving or declining
-
-## Sessions
-
-Sessions represent the continuous agent effort for a task. Each session records the input, output, and outcome. Humans may trigger a retry if the result is unsatisfactory, reusing the same session unless a reset is requested.
-
-### Session Rules
-
-* A retry during **Implement** restarts the implementation stage within the same session unless a reset is requested.
-* A retry with additional human feedback sends the task back to the **Plan** stage and continues the session unless a new session is created for auditing.
-* All sessions are logged and attached to the task for auditing.
+* Retries during **Implement** restart implementation within the same session unless explicitly reset.
+* Retries with new human feedback send the task back to **Plan**; the same session continues unless a new one is requested.
+* All sessions are logged and attached to the task for audit.
